@@ -18,11 +18,11 @@ class Server:
     def __init__(self):
         self.buffer: list[Data] = []
         self.ip: int = next(self._ip_counter)
-        self.router: Router | None = None
+        self.__router: Router | None = None
 
     def send_data(self, data: Data) -> None:
         """Отправка пакета данных"""
-        if self.router is None:
+        if self.__router is None:
             raise ConnectionError("Сервер не подключен к сети")
         if not isinstance(data, Data):
             raise TypeError(
@@ -32,7 +32,7 @@ class Server:
             raise ValueError(
                 "Невозможно отправить данные на свой собственный IP"
             )
-        self.router.receive_data(data)
+        self.__router.receive_data(data)
 
     def get_data(self) -> list[Data]:
         """Получение списка полученных данных"""
@@ -46,15 +46,15 @@ class Server:
 
     def set_router(self, router: "Router"):
         """Подсоединение к роутеру"""
-        if self.router is not None:
+        if self.__router is not None:
             raise ConnectionError("Сервер уже подключен к роутеру")
-        self.router = router
+        self.__router = router
 
     def unset_router(self):
         """Отсоединение от роутера"""
-        if self.router is None:
+        if self.__router is None:
             raise ConnectionError("Сервер не подключен к роутеру")
-        self.router = None
+        self.__router = None
 
     def receive_data(self, data: Data) -> None:
         """Принять новые данные"""
@@ -65,7 +65,9 @@ class Server:
         self.buffer.append(data)
 
     def __str__(self):
-        return f"Server(ip={self.ip})"
+        return f"Server(ip={self.ip}) " + (
+            "подключен к сети" if self.__router else "не подключен к сети"
+        )
 
     def __repr__(self):
         return str(self)
